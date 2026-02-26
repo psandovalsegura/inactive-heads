@@ -1,0 +1,9 @@
+torch==2.6.0
+transformers==4.48.2
+datasets==3.2.0
+matplotlib
+sentencepiece
+jupyter
+pytorch_memlab
+protobuf
+bitsandbytes==0.47.0
