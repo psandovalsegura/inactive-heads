@@ -1,5 +1,6 @@
 import argparse
 import torch
+import json
 import numpy as np
 
 class HeadType():
@@ -63,21 +64,34 @@ class ThresholdHeadType(HeadType):
         return self.argname
     
     def generate_all_thresholds(self, model_id: str, task_id: str):
-        """Generate a all thresholds for this head type.
+        """Load 7 thresholds for this head type based on the CDF of head scores for the given model and task. 
+           The thresholds correspond to capturing [0%, 5%, 10%, 15%, 20%, 25%, 30%] of heads.
+           We load the thresholds from thresholds.json
             Arg:
                 model_id: The model ID to use for generating thresholds. Ex. 'meta-llama/Llama-2-7b-hf'
         """
-        model_str = model_id.replace('/', '_')
-        cdf_file = f"results-head-score-cdfs/{task_id}/{model_str}_{self.name}.pt"
-        cdf = torch.load(cdf_file, weights_only=False)
-        ys = np.array([round(p, 2) for p in np.linspace(0.0, 0.3, 7)]) # [0.0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3]
-        if not self.less_than_threshold:
-            # if our rule is to check if score > threshold, then finding p proportion 
-            # of heads corresponds to finding the (1-p) quantile of the CDF
-            ys = 1 - ys
-
-        xs = [x_intercept_for_cdf(cdf, y).item() for y in ys]
+        data = json.load(open("thresholds.json", "r"))
+        xs = data[task_id][model_id.replace('/', '_')][self.name]
         return xs
+
+    # Uncomment the following if you're using your own CDFs!
+    # def generate_all_thresholds(self, model_id: str, task_id: str):
+    #     """Calculate 7 thresholds for this head type based on the CDF of head scores for the given model and task. 
+    #        The thresholds correspond to capturing [0%, 5%, 10%, 15%, 20%, 25%, 30%] of heads.
+    #         Arg:
+    #             model_id: The model ID to use for generating thresholds. Ex. 'meta-llama/Llama-2-7b-hf'
+    #     """
+    #     model_str = model_id.replace('/', '_')
+    #     cdf_file = f"results-head-score-cdfs/{task_id}/{model_str}_{self.name}.pt" # TODO: load your own CDF of scores file here
+    #     cdf = torch.load(cdf_file, weights_only=False)
+    #     ys = np.array([round(p, 2) for p in np.linspace(0.0, 0.3, 7)]) # [0.0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3]
+    #     if not self.less_than_threshold:
+    #         # if our rule is to check if score > threshold, then finding p proportion 
+    #         # of heads corresponds to finding the (1-p) quantile of the CDF
+    #         ys = 1 - ys
+
+    #     xs = [x_intercept_for_cdf(cdf, y).item() for y in ys]
+    #     return xs
     
     def set_threshold(self, new_threshold: float):
         """Set a new threshold for this head type."""
@@ -97,6 +111,8 @@ class RandomHeads(ThresholdHeadType):
         super().__init__(name="Random", threshold=threshold, less_than_threshold=True)
     
     def generate_all_thresholds(self, model_id: str, task_id: str):
+        # thresholds are fixed for random heads, since the threshold 
+        # corresponds to the probability of selecting each head
         return np.array([round(p, 2) for p in np.linspace(0.0, 0.3, 7)])
 
 class DormantHeads(ThresholdHeadType):

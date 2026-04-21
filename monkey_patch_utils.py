@@ -165,7 +165,6 @@ def get_head_scores(model, forward_pass_idx=None):
 from monkey_patch_llama import patch_llama
 from monkey_patch_olmo2 import patch_olmo2
 from monkey_patch_qwen2 import patch_qwen2    
-from monkey_patch_gpt2 import patch_gpt2
 from monkey_patch_head_types import is_supported_head_type
 
 def should_apply_chat_template(pretrained_model_name_or_path):
@@ -193,8 +192,6 @@ def patch_model(pretrained_model_name_or_path,
         patch_fn = patch_olmo2
     elif any(qwen_str in pretrained_model_name_or_path for qwen_str in ['Qwen2.5']):
         patch_fn = patch_qwen2
-    elif pretrained_model_name_or_path in ['gpt2']:
-        patch_fn = patch_gpt2
     else:
         raise NotImplementedError(f"Patching not implemented for {pretrained_model_name_or_path}")
     patch_fn(save_value_states=save_value_states,

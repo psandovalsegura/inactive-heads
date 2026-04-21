@@ -10,21 +10,21 @@ debug = False
 verbose = False
 command = subprocess.run if not debug else print
 
-# Other models included in the paper:
+# List of models to evaluate. You can modify this list to include the models you want to evaluate.
 # pretrained_model_name_or_paths = ['meta-llama/Llama-3.2-3B', 'meta-llama/Llama-3.2-3B-Instruct', 'meta-llama/Llama-3.1-8B', 'meta-llama/Llama-3.1-8B-Instruct',\
 #     'allenai/OLMo-2-1124-7B', 'allenai/OLMo-2-1124-7B-SFT', 'allenai/OLMo-2-1124-7B-DPO', 'allenai/OLMo-2-1124-7B-Instruct',\
 #     'Qwen/Qwen2.5-0.5B', 'Qwen/Qwen2.5-1.5B', 'Qwen/Qwen2.5-3B', 'Qwen/Qwen2.5-7B', 'Qwen/Qwen2.5-7B-Instruct', 'Qwen/Qwen2.5-14B']
-pretrained_model_name_or_paths = ['meta-llama/Llama-3.1-8B-Instruct', 'Qwen/Qwen2.5-7B', 'Qwen/Qwen2.5-3B']
+pretrained_model_name_or_paths = ['meta-llama/Llama-3.1-8B-Instruct']
 
 
-# In order to save the percents file for each task, we need to run the evaluation script for each task separately
+# In order to save the percents file for each task, we run the evaluation script for each task separately
 tasks, num_fewshot = 'mmlu', 5
 # Other tasks included in the paper:
 # tasks, num_fewshot = 'gsm8k', 5
 # tasks, num_fewshot = 'winogrande', 5
 # tasks, num_fewshot = 'piqa', 0
 
-# Result dir prefix
+# Result dir prefix. This is where results will be saved. 
 date_str = date.today().isoformat()
 results_dir = f"results-{date_str}-attention-heads-drop"
 
@@ -32,7 +32,7 @@ results_dir = f"results-{date_str}-attention-heads-drop"
 slurm_script1 = 'scripts/lm-eval-attention-heads-drop.sh' # A6000
 slurm_script2 = 'scripts/lm-eval-attention-heads-drop-1.sh' # L40S
 
-# Create head class (with dummy values) to access the generate_all_thresholds method
+# Create head class (with dummy threshold 0.0) to access the generate_all_thresholds method
 # track_head_classes = [DormantHeads(0.0), HonorHeads(0.0), \
 #                       NormalizedDormantHeads(0.0), UnnormalizedHonorHeads(0.0), \
 #                       EntropyHeads(0.0), NormalizedEntropyHeads(0.0)]
@@ -41,8 +41,9 @@ slurm_script2 = 'scripts/lm-eval-attention-heads-drop-1.sh' # L40S
 #                       HeadOutputMagnitudeLastToken(0.0), HeadOutputMagnitudeNormalizedLastToken(0.0), \
 #                       HeadOutputMagnitudeNormalizedHeadLastToken(0.0)]
 # track_head_classes += [RandomHeads(0.0)]
+# track_head_classes += [FullHeadOutput(0.0), FullHeadOutputNormalized(0.0)]
+track_head_classes = [RandomHeads(0.0), DormantHeads(0.0), HonorHeads(0.0)]
 
-track_head_classes = [FullHeadOutput(0.0), FullHeadOutputNormalized(0.0)]
 
 # Helper function to not submit jobs that have already been computed
 def is_job_complete(pretrained_model_name_or_path, task, results_dir, track_head_type):

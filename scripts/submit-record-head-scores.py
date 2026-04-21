@@ -8,19 +8,19 @@ from monkey_patch_head_types import *
 debug = False
 command = subprocess.run if not debug else print
 
+# List of models to evaluate. You can modify this list to include the models you want to evaluate.
 # pretrained_model_name_or_paths = ['Qwen/Qwen2.5-7B', 'meta-llama/Llama-3.1-8B', 'allenai/OLMo-2-1124-7B', 'meta-llama/Llama-3.2-3B', 'meta-llama/Llama-3.2-3B-Instruct', 'meta-llama/Llama-3.1-8B-Instruct',\
 #                                   'allenai/OLMo-2-1124-7B-SFT', 'allenai/OLMo-2-1124-7B-DPO', 'allenai/OLMo-2-1124-7B-Instruct',\
 #                                   'Qwen/Qwen2.5-0.5B', 'Qwen/Qwen2.5-1.5B', 'Qwen/Qwen2.5-3B',  'Qwen/Qwen2.5-7B-Instruct', 'Qwen/Qwen2.5-14B']
 pretrained_model_name_or_paths = ['meta-llama/Llama-3.1-8B-Instruct', 'Qwen/Qwen2.5-7B', 'Qwen/Qwen2.5-3B'] 
 # 'allenai/OLMo-2-1124-7B-Instruct' didn't work due to data type issue causing NaNs/infs in head scores
 
-# In order to save the percents file for each task, 
-# we need to run the evaluation script for each task separately
+# In order to save the percents file for each task, we run the evaluation script for each task separately
 tasks, num_fewshot = 'mmlu', 5
 # tasks, num_fewshot = 'winogrande', 5
 # tasks, num_fewshot = 'piqa', 0
 
-# Result dir prefix
+# Result dir prefix. This is where results will be saved. 
 results_dir = f"results-record-head-scores"
 
 slurm_script = 'scripts/lm-eval-record-head-scores.sh'
